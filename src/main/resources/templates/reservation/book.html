@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Book Tickets</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1 th:text="'Book Tickets for ' + ${spectacle.titre}">Book Tickets</h1>
+    <p>Price per ticket: <span th:text="${spectacle.prix}"></span></p>
+
+    <form th:action="@{/reservations/book}" method="post">
+        <input type="hidden" name="spectacleId" th:value="${spectacle.id}">
+
+        <label for="nbPlaces">Number of Tickets:</label>
+        <input type="number" id="nbPlaces" name="nbPlaces" min="1" value="1" required onchange="calculateTotal()">
+
+        <p>Total Amount: <span id="totalAmount"></span></p>
+
+        <button type="submit">Confirm Booking</button>
+    </form>
+
+    <script>
+        function calculateTotal() {
+            var price = parseFloat("[[${spectacle.prix}]]");
+            var nbPlaces = parseInt(document.getElementById("nbPlaces").value);
+            var total = price * nbPlaces;
+            document.getElementById("totalAmount").innerText = total.toFixed(2);
+        }
+        calculateTotal(); // Initial calculation
+    </script>
+    <a th:href="@{/spectacles/{id}(id=${spectacle.id})}">Back to Spectacle Details</a>
+</body>
+</html>

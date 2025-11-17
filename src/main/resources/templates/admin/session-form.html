@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Session Form</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1 th:text="${session.id == null ? 'Create New Session' : 'Edit Session'}">Session Form</h1>
+
+    <form th:action="@{/admin/sessions/save}" th:object="${session}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <input type="hidden" name="spectacleId" th:value="${session.spectacle.id}">
+
+        <label for="dateTime">Date and Time:</label>
+        <input type="datetime-local" id="dateTime" th:field="*{dateTime}" required><br>
+
+        <label for="capacity">Capacity:</label>
+        <input type="number" id="capacity" th:field="*{capacity}" min="1" required><br>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" th:field="*{price}" step="0.01" min="0" required><br>
+
+        <button type="submit">Save Session</button>
+    </form>
+    <a th:href="@{/admin/sessions/spectacle/{spectacleId}(spectacleId=${session.spectacle.id})}">Back to Sessions</a>
+</body>
+</html>

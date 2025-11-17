@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Spectacle Form</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1 th:text="${spectacle.id == null ? 'Create New Spectacle' : 'Edit Spectacle'}">Spectacle Form</h1>
+
+    <form th:action="@{/spectacles/admin}" th:object="${spectacle}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <label for="titre">Title:</label>
+        <input type="text" id="titre" th:field="*{titre}" required><br>
+
+        <label for="description">Description:</label>
+        <textarea id="description" th:field="*{description}" required></textarea><br>
+
+        <label for="image">Image URL:</label>
+        <input type="text" id="image" th:field="*{image}"><br>
+
+        <label for="prix">Price:</label>
+        <input type="number" id="prix" th:field="*{prix}" step="0.01" min="0" required><br>
+
+        <label for="date">Date:</label>
+        <input type="date" id="date" th:field="*{date}" required><br>
+
+        <label for="genre">Genre:</label>
+        <input type="text" id="genre" th:field="*{genre}"><br>
+
+        <button type="submit">Save Spectacle</button>
+    </form>
+
+    <div th:if="${spectacle.id != null}">
+        <a th:href="@{/admin/sessions/spectacle/{id}(id=${spectacle.id})}">Manage Sessions</a>
+    </div>
+    <a href="/spectacles">Back to Spectacles List</a>
+</body>
+</html>
