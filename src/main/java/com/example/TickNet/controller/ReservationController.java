@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/reservations")
+@CrossOrigin(origins = "http://localhost:5174")
 public class ReservationController {
 
     @Autowired

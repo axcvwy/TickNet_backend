@@ -13,6 +13,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/admin/sessions")
+@CrossOrigin(origins = "http://localhost:5174")
 public class SessionController {
 
     @Autowired

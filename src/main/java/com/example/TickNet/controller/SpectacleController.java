@@ -11,6 +11,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/spectacles")
+@CrossOrigin(origins = "http://localhost:5174")
 public class SpectacleController {
 
     @Autowired
