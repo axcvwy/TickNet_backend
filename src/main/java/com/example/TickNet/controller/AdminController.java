@@ -2,28 +2,28 @@ package com.example.TickNet.controller;
 
 import com.example.TickNet.service.ReservationService;
 import com.example.TickNet.service.SpectacleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
-@RequestMapping("/admin")
-@CrossOrigin(origins = "http://localhost:5174")
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/admin")
 public class AdminController {
 
-    @Autowired
-    private ReservationService reservationService;
-    @Autowired
-    private SpectacleService spectacleService;
+    private final ReservationService reservationService;
+    private final SpectacleService spectacleService;
+
+    public AdminController(ReservationService reservationService, SpectacleService spectacleService) {
+        this.reservationService = reservationService;
+        this.spectacleService = spectacleService;
+    }
 
     @GetMapping("/dashboard")
-    public String adminDashboard(Model model) {
-        model.addAttribute("totalSales", reservationService.getTotalSales());
-        model.addAttribute("totalReservations", reservationService.getTotalReservations());
-        model.addAttribute("spectacles", spectacleService.getAllSpectacles());
-        return "admin/dashboard"; // Assuming a Thymeleaf template
+    public Map<String, Object> dashboard() {
+        return Map.of(
+                "totalSales", reservationService.getTotalSales(),
+                "totalReservations", reservationService.getTotalReservations(),
+                "spectacles", spectacleService.getAllSpectacles()
+        );
     }
 }

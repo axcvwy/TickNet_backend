@@ -6,7 +6,7 @@
 </head>
 <body>
     <h1>Register</h1>
-    <form th:action="@{/users/register}" th:object="${utilisateur}" method="post">
+    <form th:action="@{/users/register}" th:object="${visiteur}" method="post">
         <label for="nom">Name:</label>
         <input type="text" id="nom" th:field="*{nom}" required><br>
 

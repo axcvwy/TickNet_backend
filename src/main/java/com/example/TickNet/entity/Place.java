@@ -3,77 +3,41 @@ package com.example.TickNet.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "seat") // adapte si ta table s'appelle autrement
+@Table(name = "place")
 public class Place {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "place_id")
-    private Integer id;
+    private Long id;
 
-    @Column(name = "numero_place", nullable = false)
-    private Integer numeroPlace;
-
-    @Column(name = "est_reservee", nullable = false)
-    private Boolean estReservee = false;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "salle_id", nullable = false)
     private Salle salle;
 
-    @ManyToOne
-    @JoinColumn(name = "session_id", nullable = false)
-    private Session session;
+    private String rangee;
+    private Integer numero;
 
-    public Place() {
-    }
+    @Column(name = "type_place")
+    private String typePlace;
 
-    public Place(Integer id, Integer numeroPlace, Boolean estReservee,
-                 Salle salle, Session session) {
-        this.id = id;
-        this.numeroPlace = numeroPlace;
-        this.estReservee = estReservee;
-        this.salle = salle;
-        this.session = session;
-    }
+    private Boolean active;
 
-    public Integer getId() {
-        return id;
-    }
+    // getters/setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    public Salle getSalle() { return salle; }
+    public void setSalle(Salle salle) { this.salle = salle; }
 
-    public Integer getNumeroPlace() {
-        return numeroPlace;
-    }
+    public String getRangee() { return rangee; }
+    public void setRangee(String rangee) { this.rangee = rangee; }
 
-    public void setNumeroPlace(Integer numeroPlace) {
-        this.numeroPlace = numeroPlace;
-    }
+    public Integer getNumero() { return numero; }
+    public void setNumero(Integer numero) { this.numero = numero; }
 
-    public Boolean getEstReservee() {
-        return estReservee;
-    }
+    public String getTypePlace() { return typePlace; }
+    public void setTypePlace(String typePlace) { this.typePlace = typePlace; }
 
-    public void setEstReservee(Boolean estReservee) {
-        this.estReservee = estReservee;
-    }
-
-    public Salle getSalle() {
-        return salle;
-    }
-
-    public void setSalle(Salle salle) {
-        this.salle = salle;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
+    public Boolean getActive() { return active; }
+    public void setActive(Boolean active) { this.active = active; }
 }

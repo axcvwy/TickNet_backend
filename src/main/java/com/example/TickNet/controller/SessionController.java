@@ -1,67 +1,52 @@
 package com.example.TickNet.controller;
 
 import com.example.TickNet.entity.Session;
-import com.example.TickNet.entity.Spectacle;
 import com.example.TickNet.service.SessionService;
-import com.example.TickNet.service.SpectacleService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
-@RequestMapping("/admin/sessions")
-@CrossOrigin(origins = "http://localhost:5174")
+@RestController
+@RequestMapping("/api/sessions")
 public class SessionController {
 
-    @Autowired
-    private SessionService sessionService;
-    @Autowired
-    private SpectacleService spectacleService;
+    private final SessionService sessionService;
 
+    public SessionController(SessionService sessionService) {
+        this.sessionService = sessionService;
+    }
+
+    // Liste des sessions d’un spectacle
     @GetMapping("/spectacle/{spectacleId}")
-    public String listSessionsForSpectacle(@PathVariable Long spectacleId, Model model) {
-        Spectacle spectacle = spectacleService.getSpectacleById(spectacleId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid spectacle Id:" + spectacleId));
-        List<Session> sessions = sessionService.getSessionsBySpectacleId(spectacleId);
-        model.addAttribute("spectacle", spectacle);
-        model.addAttribute("sessions", sessions);
-        return "admin/session-list"; // Assuming a Thymeleaf template
+    public List<Session> listBySpectacle(@PathVariable Long spectacleId) {
+        return sessionService.getSessionsBySpectacleId(spectacleId);
     }
 
-    @GetMapping("/new/{spectacleId}")
-    public String showCreateSessionForm(@PathVariable Long spectacleId, Model model) {
-        Spectacle spectacle = spectacleService.getSpectacleById(spectacleId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid spectacle Id:" + spectacleId));
-        Session session = new Session();
-        session.setSpectacle(spectacle);
-        model.addAttribute("session", session);
-        return "admin/session-form"; // Assuming a Thymeleaf template
+    // Détail session
+    @GetMapping("/{id}")
+    public ResponseEntity<Session> getOne(@PathVariable Long id) {
+        return sessionService.getSessionById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/save")
-    public String saveSession(@ModelAttribute Session session, @RequestParam Long spectacleId) {
-        Spectacle spectacle = spectacleService.getSpectacleById(spectacleId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid spectacle Id:" + spectacleId));
-        session.setSpectacle(spectacle);
-        session.setAvailableSeats(session.getCapacity()); // Initialize available seats
-        sessionService.saveSession(session);
-        return "redirect:/admin/sessions/spectacle/" + spectacleId;
+    // Créer session
+    @PostMapping
+    public ResponseEntity<Session> create(@RequestBody Session session) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(sessionService.saveSession(session));
     }
 
-    @GetMapping("/edit/{id}")
-    public String showEditSessionForm(@PathVariable Long id, Model model) {
-        Session session = sessionService.getSessionById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid session Id:" + id));
-        model.addAttribute("session", session);
-        return "admin/session-form"; // Assuming a Thymeleaf template
+    // Modifier session
+    @PutMapping("/{id}")
+    public Session update(@PathVariable Long id, @RequestBody Session session) {
+        return sessionService.updateSession(id, session);
     }
 
-    @GetMapping("/delete/{id}")
-    public String deleteSession(@PathVariable Long id, @RequestParam Long spectacleId) {
+    // Supprimer session
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) {
         sessionService.deleteSession(id);
-        return "redirect:/admin/sessions/spectacle/" + spectacleId;
     }
 }

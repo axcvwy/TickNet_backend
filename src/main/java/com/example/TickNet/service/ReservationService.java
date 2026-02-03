@@ -1,99 +1,93 @@
 package com.example.TickNet.service;
 
+import com.example.TickNet.Dto.ReservationCreateRequest;
 import com.example.TickNet.entity.Reservation;
 import com.example.TickNet.entity.Session;
-import com.example.TickNet.entity.Utilisateur;
+import com.example.TickNet.entity.Visiteur;
 import com.example.TickNet.repository.ReservationRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.TickNet.repository.SessionRepository;
+import com.example.TickNet.repository.VisiteurRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ReservationService {
 
-    @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
-    private SessionService sessionService;
-    @Autowired
-    private UtilisateurService utilisateurService;
+    private final ReservationRepository reservationRepository;
+    private final SessionRepository sessionRepository;
+    private final VisiteurRepository visiteurRepository;
+
+    public ReservationService(ReservationRepository reservationRepository,
+                              SessionRepository sessionRepository,
+                              VisiteurRepository visiteurRepository) {
+        this.reservationRepository = reservationRepository;
+        this.sessionRepository = sessionRepository;
+        this.visiteurRepository = visiteurRepository;
+    }
 
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }
 
-    public Optional<Reservation> getReservationById(Long id) {
-        return reservationRepository.findById(id);
+    public List<Reservation> getReservationsByVisiteur(Long visiteurId) {
+        return reservationRepository.findByVisiteurId(visiteurId);
     }
 
-    public Reservation createReservation(Long userId, Long sessionId, int nbPlaces) {
-        Optional<Utilisateur> utilisateurOptional = utilisateurService.getUtilisateurById(userId);
-        Optional<Session> sessionOptional = sessionService.getSessionById(sessionId);
-
-        if (utilisateurOptional.isPresent() && sessionOptional.isPresent()) {
-            Utilisateur utilisateur = utilisateurOptional.get();
-            Session session = sessionOptional.get();
-
-            if (session.getAvailableSeats() < nbPlaces) {
-                throw new RuntimeException("Not enough available seats for this session.");
-            }
-
-            Reservation reservation = new Reservation();
-            reservation.setUtilisateur(utilisateur);
-            reservation.setSession(session);
-            reservation.setNbPlaces(nbPlaces);
-            reservation.setMontantTotal(nbPlaces * session.getPrice());
-            reservation.setDate(LocalDate.now());
-
-            sessionService.decreaseAvailableSeats(sessionId, nbPlaces);
-            return reservationRepository.save(reservation);
-        } else {
-            throw new RuntimeException("User or Session not found");
-        }
-    }
-
-    public void deleteReservation(Long id) {
-        Optional<Reservation> reservationOptional = reservationRepository.findById(id);
-        if (reservationOptional.isPresent()) {
-            Reservation reservation = reservationOptional.get();
-            sessionService.increaseAvailableSeats(reservation.getSession().getId(), reservation.getNbPlaces());
-            reservationRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Reservation not found with ID: " + id);
-        }
-    }
-
-    public List<Reservation> getReservationsByUserId(Long userId) {
-        return reservationRepository.findByUtilisateurId(userId);
-    }
-
-    public List<Reservation> getReservationsBySessionId(Long sessionId) {
-        return reservationRepository.findBySessionId(sessionId);
-    }
-
-    public double getTotalSales() {
+    /** ✅ TOTAL des ventes */
+    public BigDecimal getTotalSales() {
         return reservationRepository.findAll().stream()
-                .mapToDouble(Reservation::getMontantTotal)
-                .sum();
+                .map(Reservation::getMontantTotal)
+                .filter(mt -> mt != null)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    /** ✅ TOTAL des réservations */
     public long getTotalReservations() {
         return reservationRepository.count();
     }
 
-    public double getTotalSalesForSpectacle(Long spectacleId) {
-        return reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getSession().getSpectacle().getId().equals(spectacleId))
-                .mapToDouble(Reservation::getMontantTotal)
-                .sum();
+    @Transactional
+    public Reservation createReservation(ReservationCreateRequest req) {
+
+        Visiteur visiteur = visiteurRepository.findById(req.visiteurId())
+                .orElseThrow(() -> new RuntimeException("Visiteur introuvable"));
+
+        Session session = sessionRepository.findById(req.sessionId())
+                .orElseThrow(() -> new RuntimeException("Session introuvable"));
+
+        long alreadyReserved = reservationRepository.sumReservedSeats(session.getId());
+        long capacity = session.getCapacite() != null ? session.getCapacite() : 0L;
+        long remaining = capacity - alreadyReserved;
+
+        if (remaining < req.nbPlaces()) {
+            throw new RuntimeException("Pas assez de places disponibles. Restant: " + remaining);
+        }
+
+        // ✅ prix BigDecimal
+        BigDecimal prix = session.getPrix() != null ? session.getPrix() : BigDecimal.ZERO;
+
+        // ✅ total BigDecimal
+        BigDecimal total = prix.multiply(BigDecimal.valueOf(req.nbPlaces()));
+
+        Reservation r = new Reservation();
+        r.setVisiteur(visiteur);
+        r.setSession(session);
+        r.setNbPlaces(req.nbPlaces());
+        r.setMontantTotal(total);          // ✅ BigDecimal
+        r.setStatut("CONFIRMED");
+        r.setDateReservation(LocalDateTime.now());
+
+        return reservationRepository.save(r);
     }
 
-    public long getTotalReservationsForSpectacle(Long spectacleId) {
-        return reservationRepository.findAll().stream()
-                .filter(reservation -> reservation.getSession().getSpectacle().getId().equals(spectacleId))
-                .count();
+    public void cancelReservation(Long id) {
+        Reservation r = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation introuvable"));
+        r.setStatut("CANCELLED");
+        reservationRepository.save(r);
     }
 }
