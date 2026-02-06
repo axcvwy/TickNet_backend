@@ -17,13 +17,16 @@ public class SessionController {
         this.sessionService = sessionService;
     }
 
-    // Liste des sessions d’un spectacle
+    @GetMapping
+    public List<Session> listAll() {
+        return sessionService.getAllSessions();
+    }
+
     @GetMapping("/spectacle/{spectacleId}")
     public List<Session> listBySpectacle(@PathVariable Long spectacleId) {
         return sessionService.getSessionsBySpectacleId(spectacleId);
     }
 
-    // Détail session
     @GetMapping("/{id}")
     public ResponseEntity<Session> getOne(@PathVariable Long id) {
         return sessionService.getSessionById(id)
@@ -31,19 +34,16 @@ public class SessionController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // Créer session
     @PostMapping
     public ResponseEntity<Session> create(@RequestBody Session session) {
         return ResponseEntity.status(HttpStatus.CREATED).body(sessionService.saveSession(session));
     }
 
-    // Modifier session
     @PutMapping("/{id}")
     public Session update(@PathVariable Long id, @RequestBody Session session) {
         return sessionService.updateSession(id, session);
     }
 
-    // Supprimer session
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

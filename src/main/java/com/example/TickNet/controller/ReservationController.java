@@ -19,6 +19,11 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
+    @GetMapping
+    public List<Reservation> listAll() {
+        return reservationService.getAllReservations();
+    }
+
     @PostMapping
     public ResponseEntity<Reservation> create(@Valid @RequestBody ReservationCreateRequest req) {
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.createReservation(req));
