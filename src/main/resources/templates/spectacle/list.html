@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Spectacle List</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Spectacles</h1>
+    <div th:each="spectacle : ${spectacles}">
+        <h2 th:text="${spectacle.titre}">Spectacle Title</h2>
+        <p th:text="${spectacle.description}">Description</p>
+        <p>Date: <span th:text="${spectacle.date}"></span></p>
+        <p>Price: <span th:text="${spectacle.prix}"></span></p>
+        <a th:href="@{/spectacles/{id}(id=${spectacle.id})}">View Details</a>
+        <a th:href="@{/reservations/book/{id}(id=${spectacle.id})}">Book Tickets</a>
+    </div>
+    <a href="/users/login">Login</a> | <a href="/users/register">Register</a>
+</body>
+</html>

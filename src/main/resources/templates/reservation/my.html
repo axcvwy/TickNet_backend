@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Reservations</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>My Reservations</h1>
+    <div th:each="reservation : ${reservations}">
+        <h2 th:text="${reservation.spectacle.titre}">Spectacle Title</h2>
+        <p>Date: <span th:text="${reservation.date}"></span></p>
+        <p>Number of Places: <span th:text="${reservation.nbPlaces}"></span></p>
+        <p>Total Amount: <span th:text="${reservation.montantTotal}"></span></p>
+    </div>
+    <p th:if="${#lists.isEmpty(reservations)}">You have no reservations yet.</p>
+    <a href="/spectacles">Browse Spectacles</a>
+</body>
+</html>

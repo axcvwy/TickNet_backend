@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1>Admin Dashboard</h1>
+
+    <h2>Overall Statistics</h2>
+    <p>Total Sales: <span th:text="${totalSales}"></span></p>
+    <p>Total Reservations: <span th:text="${totalReservations}"></span></p>
+
+    <h2>Spectacle-wise Statistics</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Spectacle Title</th>
+                <th>Total Sales</th>
+                <th>Total Reservations</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="spectacle : ${spectacles}">
+                <td th:text="${spectacle.titre}"></td>
+                <td th:text="${reservationService.getTotalSalesForSpectacle(spectacle.id)}"></td>
+                <td th:text="${reservationService.getTotalReservationsForSpectacle(spectacle.id)}"></td>
+                <td>
+                    <a th:href="@{/spectacles/admin/edit/{id}(id=${spectacle.id})}">Edit Spectacle</a>
+                    <a th:href="@{/admin/sessions/spectacle/{id}(id=${spectacle.id})}">Manage Sessions</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <a href="/spectacles/admin/new">Add New Spectacle</a>
+</body>
+</html>

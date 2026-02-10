@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Manage Sessions for <span th:text="${spectacle.titre}"></span></title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <h1 th:text="'Sessions for ' + ${spectacle.titre}"></h1>
+
+    <a th:href="@{/admin/sessions/new/{spectacleId}(spectacleId=${spectacle.id})}">Add New Session</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Date & Time</th>
+                <th>Capacity</th>
+                <th>Available Seats</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="session : ${sessions}">
+                <td th:text="${session.dateTime}"></td>
+                <td th:text="${session.capacity}"></td>
+                <td th:text="${session.availableSeats}"></td>
+                <td th:text="${session.price}"></td>
+                <td>
+                    <a th:href="@{/admin/sessions/edit/{id}(id=${session.id})}">Edit</a>
+                    <a th:href="@{/admin/sessions/delete/{id}(id=${session.id}, spectacleId=${spectacle.id})}" onclick="return confirm('Are you sure you want to delete this session?');">Delete</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <p th:if="${#lists.isEmpty(sessions)}">No sessions found for this spectacle.</p>
+    <a href="/spectacles">Back to Spectacles List</a>
+</body>
+</html>
