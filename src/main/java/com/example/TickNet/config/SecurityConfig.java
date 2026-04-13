@@ -20,7 +20,9 @@ public class SecurityConfig {
                 // Swagger a ajouter ici
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/api/**"
+                                "/api/**",
+                                "/v3/api-docs",
+                                "/swagger-ui/index.html"
                         ).permitAll()
                         .anyRequest().permitAll()
                 );
