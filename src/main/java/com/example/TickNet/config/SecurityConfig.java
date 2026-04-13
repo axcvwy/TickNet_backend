@@ -17,6 +17,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
 
                 // autoriser l'accès à tes endpoints API pour le dev
+                // Swagger a ajouter ici
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/**"
